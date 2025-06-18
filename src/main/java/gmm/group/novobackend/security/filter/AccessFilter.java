@@ -56,6 +56,12 @@ public class AccessFilter implements Filter {
             } else {
                 chain.doFilter(request, response);
             }
+        } else if (isDoacaoRoute(method, path)) {
+            if (nivel.equals("C") || nivel.equals("A")) {
+                chain.doFilter(request, response);
+            } else {
+                forbidden(res);
+            }
         }
         else if (isAnimalRoute(method, path)) {
             chain.doFilter(request, response);
@@ -99,7 +105,12 @@ public class AccessFilter implements Filter {
                 path.contains("/buscar-filtro") || path.contains("/buscar-cor") || path.contains("/buscar-raca")
         );
     }
-
+    private boolean isDoacaoRoute(String method, String path) {
+        return path.startsWith("/apis/doacao") && (
+                (method.equals("POST") && path.contains("/gravar"))
+                || (method.equals("GET") && path.matches(".*/buscarPorUsuario/\\d+"))
+        );
+    }
     private void forbidden(HttpServletResponse res) throws IOException {
         res.setStatus(HttpServletResponse.SC_FORBIDDEN);
         res.getWriter().write("Acesso negado");
